@@ -13,7 +13,7 @@
     }
 
     .quiz-container {
-      max-width: 700px;
+      max-width: 900px;
       margin: 0 auto;
       background: #fff;
       padding: 25px;
@@ -39,10 +39,12 @@
       list-style: none;
       padding: 0;
       margin: 0 0 25px 0;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 10px 25px;
     }
 
     .answers li {
-      margin-bottom: 12px;
       display: flex;
       align-items: flex-start;
       gap: 10px;
@@ -59,10 +61,9 @@
       flex: 1;
     }
 
-    /* Nút mặc định (đã chỉnh để cả hai nút có cùng kích thước) */
     button {
       display: block;
-      margin: 0 auto;
+      margin: 10px auto;
       padding: 12px 25px;
       font-size: 16px;
       font-weight: bold;
@@ -72,14 +73,85 @@
       border-radius: 10px;
       cursor: pointer;
       transition: background 0.3s;
-      width: 100%;         /* <-- đảm bảo cùng kích thước */
-      box-sizing: border-box;
     }
 
     button:hover {
       background: #218838;
     }
 
+    /* --- Ô “Gợi ý” --- */
+    .hint-box {
+      text-align: center;
+      border: 2px solid #ccc;
+      border-radius: 8px;
+      padding: 12px 0;
+      width: 260px;
+      margin: 15px auto 25px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .hint-box:hover {
+      background: #f5f5f5;
+    }
+
+    .hint-title {
+      font-weight: bold;
+      color: #222;
+      font-size: 17px;
+    }
+
+    .hint-note {
+      font-size: 13px;
+      color: #888;
+      margin-top: 4px;
+    }
+
+    /* --- Popup Gợi ý --- */
+    #hint-popup {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.6);
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+    }
+
+    #hint-popup .popup-content {
+      position: relative;
+      background: #fff;
+      padding: 15px;
+      border-radius: 10px;
+      max-width: 600px;
+      width: 90%;
+      text-align: center;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    }
+
+    #hint-popup img {
+      max-width: 100%;
+      border-radius: 10px;
+    }
+
+    #hint-popup .popup-close {
+      position: absolute;
+      top: 5px;
+      right: 10px;
+      font-size: 22px;
+      color: #333;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    #hint-popup .popup-close:hover {
+      color: red;
+    }
+
+    /* --- Kết quả --- */
     #result-img {
       display: none;
       margin-top: 30px;
@@ -93,7 +165,7 @@
       box-shadow: 0 8px 20px rgba(0,0,0,0.2);
     }
 
-    /* --- Popup Box-up khi sai --- */
+    /* --- Popup Sai --- */
     .popup {
       display: none;
       position: fixed;
@@ -114,13 +186,7 @@
       border-radius: 10px;
       max-width: 500px;
       width: 90%;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
       text-align: center;
-    }
-
-    .popup-content img {
-      max-width: 100%;
-      border-radius: 10px;
     }
 
     .popup-close {
@@ -137,154 +203,136 @@
       color: red;
     }
 
-    /* --- Nút Gợi ý: giống nút chính nhưng có 2 dòng text (title + sub) và không có nền, chỉ viền xám --- */
-    .hint-box {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      margin: 15px auto 0;
-      padding: 12px 25px;
-      font-size: 16px;
-      font-weight: bold;
-      color: #333;
-      background: transparent;    /* không nền */
-      border: 2px solid #555;     /* viền xám đen */
+    .popup-content img {
+      max-width: 100%;
       border-radius: 10px;
-      cursor: pointer;
-      transition: background 0.2s, color 0.2s;
-      width: 100%;                /* cùng kích thước với nút kiểm tra */
-      box-sizing: border-box;
-      text-align: center;
-    }
-
-    .hint-box:hover {
-      background: #f8f8f8;        /* hover nhẹ giúp người dùng biết có thể bấm */
-    }
-
-    .hint-title {
-      font-size: 16px;
-      font-weight: bold;
-      line-height: 1;
-    }
-
-    .hint-sub {
-      font-size: 12px;
-      color: #777;
-      line-height: 1;
-    }
-
-    /* responsive nhỏ */
-    @media (max-width: 480px) {
-      .quiz-container { padding: 18px; }
     }
   </style>
 </head>
 <body>
-  <div class="quiz-container" id="quiz">
-    <h2>Câu hỏi: Tài liệu nào đã bị làm giả?</h2>
-    <div class="subtitle">Trước khi chọn đáp án, hãy chắc rằng bạn đã tìm ra 2 đặc điểm của tài liệu bị làm giả</div>
+  <div class="quiz-container" id="quiz-container">
+    <!-- Câu hỏi 1 -->
+    <div id="question1">
+      <h2>Án Mạng nào trong vụ án liên hoàn có điểm đáng ngờ?</h2>
+      <div class="subtitle">Chọn án mạng mà bạn cảm thấy có chi tiết bất thường hoặc không khớp với các vụ khác.</div>
+      <ul class="answers" id="answers1">
+        <li><input type="checkbox" value="0" id="q1a0"><label for="q1a0">Án mạng số 1 - Vũ Minh Anh</label></li>
+        <li><input type="checkbox" value="1" id="q1a1"><label for="q1a1">Án mạng số 2 - Lê Hoàng Bảo Ngọc</label></li>
+        <li><input type="checkbox" value="2" id="q1a2"><label for="q1a2">Án mạng số 3 - Phùng Mỹ Linh</label></li>
+        <li><input type="checkbox" value="3" id="q1a3"><label for="q1a3">Án mạng số 4 - Đào Lê Châu Anh</label></li>
+        <li><input type="checkbox" value="4" id="q1a4"><label for="q1a4">Án mạng số 5 - Tạ Thị Ngọc Ánh</label></li>
+      </ul>
+      <button onclick="checkQuestion1()">Kiểm tra đáp án</button>
+    </div>
 
-    <ul class="answers" id="q1">
-      <li><input type="checkbox" value="0" id="ans0"><label for="ans0">Báo cáo vụ án</label></li>
-      <li><input type="checkbox" value="1" id="ans1"><label for="ans1">Câu hỏi về nạn nhân</label></li>
-      <li><input type="checkbox" value="2" id="ans2"><label for="ans2">Lời khai nhân chứng: Nguyễn Văn Hải</label></li>
-      <li><input type="checkbox" value="3" id="ans3"><label for="ans3">Lời khai nhân chứng: Nguyễn Thị Lan</label></li>
-      <li><input type="checkbox" value="4" id="ans4"><label for="ans4">Lời khai nhân chứng: Nguyễn Nhật Linh</label></li>
-      <li><input type="checkbox" value="5" id="ans5"><label for="ans5">Lời khai nghi phạm: Nguyễn Ngọc</label></li>
-      <li><input type="checkbox" value="6" id="ans6"><label for="ans6">Lời khai nghi phạm:Vũ Hải Yến</label></li>
-      <li><input type="checkbox" value="7" id="ans7"><label for="ans7">Lời khai nghi phạm: Hoàng TIến</label></li>
-      <li><input type="checkbox" value="8" id="ans8"><label for="ans8">Lời khai nghi phạm: Hoàng Tiến</label></li>
-      <li><input type="checkbox" value="9" id="ans9"><label for="ans9">Ảnh hiện trường</label></li>
-      <li><input type="checkbox" value="10" id="ans10"><label for="ans10">Giám định mẫu vật</label></li>
-      <li><input type="checkbox" value="11" id="ans11"><label for="ans11">Danh sách cuộc gọi cuối của nạn nhân</label></li>
-    </ul>
+    <!-- Câu hỏi 2 -->
+    <div id="question2" style="display:none; margin-top:40px;">
+      <h2>Những tài liệu nào khiến bạn nghi ngờ về vụ án này?</h2>
+      <div class="subtitle">Hãy chọn 4 tài liệu hoặc vật chứng khiến bạn nghi ngờ vụ án không đơn giản.</div>
+      <ul class="answers" id="answers2">
+                <li><input type="checkbox" id="q2a0"><label for="q2a0">Báo cáo vụ án 1 - Vũ Minh Anh</label></li>
+        <li><input type="checkbox" id="q2a1"><label for="q2a1">Báo cáo vụ án 1 - Lê Hoàng Bảo Ngọc</label></li>
+        <li><input type="checkbox" id="q2a2"><label for="q2a2">Báo cáo vụ án 1 - Phùng Mỹ Linh</label></li>
+        <li><input type="checkbox" id="q2a3"><label for="q2a3">Báo cáo vụ án 1 - Đào Lê Châu Anh</label></li>
+        <li><input type="checkbox" id="q2a4"><label for="q2a4">Báo cáo vụ án 1 - Tạ Thị Ngọc Ánh</label></li>
+        <li><input type="checkbox" id="q2a5"><label for="q2a5">Câu hỏi về nạn nhân - Vũ Minh Anh </label></li>
+        <li><input type="checkbox" id="q2a6"><label for="q2a6">Câu hỏi về nạn nhân - Lê Hoàng Bảo Ngọc</label></li>
+        <li><input type="checkbox" id="q2a7"><label for="q2a7">Câu hỏi về nạn nhân - Phùng Mỹ Linh</label></li>
+        <li><input type="checkbox" id="q2a8"><label for="q2a8">Câu hỏi về nạn nhân - Đào Lê Châu Anh</label></li>
+        <li><input type="checkbox" id="q2a9"><label for="q2a9">Câu hỏi về nạn nhân - Tạ Thị Ngọc Ánh</label></li>
+        <li><input type="checkbox" id="q2a10"><label for="q2a10">Báo cáo khám nghiệm tử thi - Vũ Minh Anh</label></li>
+        <li><input type="checkbox" id="q2a11"><label for="q2a11">Báo cáo khám nghiệm tử thi - Lê Hoàng Bảo Ngọc</label></li>
+        <li><input type="checkbox" id="q2a12"><label for="q2a12">Báo cáo khám nghiệm tử thi - Phùng Mỹ Linh</label></li>
+        <li><input type="checkbox" id="q2a13"><label for="q2a13">Báo cáo khám nghiệm tử thi - Đào Lê Châu Anh</label></li>
+        <li><input type="checkbox" id="q2a14"><label for="q2a14">Báo cáo khám nghiệm tử thi - Tạ Thị Ngọc Ánh</label></li>
+        <li><input type="checkbox" id="q2a15"><label for="q2a15">Giám định mẫu vật - Vụ án Vũ Minh Anh</label></li>
+        <li><input type="checkbox" id="q2a16"><label for="q2a16">Giám định mẫu vật - Lê Hoàng Bảo Ngọc</label></li>
+        <li><input type="checkbox" id="q2a17"><label for="q2a17">Giám định mẫu vật - Phùng Mỹ Linh</label></li>
+        <li><input type="checkbox" id="q2a18"><label for="q2a18">Giám định mẫu vật - Vụ án Đào Lê Châu Anh</label></li>
+        <li><input type="checkbox" id="q2a19"><label for="q2a19">Giám định mẫu vật - Vụ án Tạ Thị Ngọc Ánh</label></li>
+        <li><input type="checkbox" id="q2a20"><label for="q2a20">Tờ Sudoku vụ án 1 - Vũ Minh Anh</label></li>
+        <li><input type="checkbox" id="q2a21"><label for="q2a21">Tờ Sudoku vụ án 1 - Lê Hoàng Bảo Ngọc</label></li>
+        <li><input type="checkbox" id="q2a22"><label for="q2a22">Tờ Sudoku vụ án 1 - Phùng Mỹ Linh</label></li>
+        <li><input type="checkbox" id="q2a23"><label for="q2a23">Tờ Sudoku vụ án 1 - Đào Lê Châu Anh</label></li>
+        <li><input type="checkbox" id="q2a24"><label for="q2a24">Tờ Sudoku vụ án 1 - Tạ Thị Ngọc Ánh</label></li>
+        <li><input type="checkbox" id="q2a25"><label for="q2a25">Ảnh nạn nhân</label></li>
+      </ul>
 
-    <!-- nút kiểm tra đáp án (nguyên bản) -->
-    <button onclick="checkAnswers()">Kiểm tra đáp án</button>
+      <!-- Nút kiểm tra đáp án -->
+      <button onclick="checkQuestion2()">Kiểm tra đáp án</button>
 
-    <!-- nút gợi ý mới (bằng kích thước nút trên, có title + sub) -->
-    <button class="hint-box" onclick="showHintPopup()">
-      <span class="hint-title">Gợi ý</span>
-      <span class="hint-sub">(chỉ sử dụng gợi ý khi đã rất bế tắc)</span>
-    </button>
+      <!-- Ô Gợi ý bên dưới -->
+      <div class="hint-box" onclick="openHint()">
+        <div class="hint-title">Gợi ý</div>
+        <div class="hint-note">(chỉ sử dụng gợi ý khi đã rất bế tắc)</div>
+      </div>
+    </div>
   </div>
 
+  <!-- Kết quả -->
   <div id="result-img">
     <img id="result-image" src="" alt="Kết quả">
   </div>
 
-  <!-- Popup hiển thị khi sai (giữ nguyên) -->
+  <!-- Popup báo sai -->
   <div class="popup" id="popup">
     <div class="popup-content">
-      <span class="popup-close" onclick="closePopup('popup')">×</span>
-      <img src="https://raw.githubusercontent.com/designdaovn/acgiaacbao-nhiemvu2/refs/heads/main/khi%20chon%20dap%20an%20sai.png" alt="Sai rồi">
+      <span class="popup-close" onclick="closePopup()">×</span>
+      <img src="https://raw.githubusercontent.com/designdaovn/Consotuthan_Nhiemvu2/refs/heads/main/khichondaansai.png" alt="Sai rồi">
     </div>
   </div>
 
-  <!-- Popup gợi ý (mới) -->
-  <div class="popup" id="hint-popup">
+  <!-- Popup Gợi ý -->
+  <div id="hint-popup">
     <div class="popup-content">
-      <span class="popup-close" onclick="closePopup('hint-popup')">×</span>
-      <img id="hint-popup-img" src="" alt="Gợi ý">
+      <span class="popup-close" onclick="closeHint()">×</span>
+      <img src="https://raw.githubusercontent.com/designdaovn/Consotuthan_Nhiemvu2/refs/heads/main/goi%20y%202.jpg" alt="Gợi ý">
     </div>
   </div>
 
   <script>
-    function checkAnswers() {
-      let selected = [];
-      document.querySelectorAll('#q1 input[type="checkbox"]:checked').forEach(cb => {
-        selected.push(parseInt(cb.value));
-      });
+    const correct1 = [3];
+    const correct2 = [8, 18, 23,25];
+    const resultImageLink = "https://raw.githubusercontent.com/designdaovn/Consotuthan_Nhiemvu2/refs/heads/main/Giai%20thich%20NV2%20copy.jpg";
 
-      if (selected.length !== 1) {
-        alert("Bạn phải chọn đúng 1 đáp án!");
-        return;
-      }
-
-      const correct = [11]; // đáp án đúng
-      selected.sort();
-
-      if (JSON.stringify(selected) === JSON.stringify(correct)) {
-        // Nếu đúng → ẩn quiz, hiện ảnh kết quả
-        document.getElementById('quiz').style.display = 'none';
-        document.getElementById('result-img').style.display = 'block';
-        document.getElementById('result-image').src =
-          "https://raw.githubusercontent.com/designdaovn/acgiaacbao-nhiemvu2/refs/heads/main/Giai%20thich%20NV2%20copy.jpg";
+    function checkQuestion1() {
+      const selected = [];
+      document.querySelectorAll('#answers1 input[type="checkbox"]:checked').forEach(cb => selected.push(parseInt(cb.value)));
+      if (JSON.stringify(selected.sort()) === JSON.stringify(correct1.sort())) {
+        document.getElementById('question2').style.display = 'block';
       } else {
-        // Nếu sai → hiện popup
         document.getElementById('popup').style.display = 'flex';
       }
     }
 
-    // đóng popup chung (nhận id để dùng cho cả 2 popup)
-    function closePopup(id) {
-      const p = document.getElementById(id);
-      if (p) p.style.display = 'none';
+    function checkQuestion2() {
+      const selected = [];
+      document.querySelectorAll('#answers2 input[type="checkbox"]:checked').forEach(cb => selected.push(parseInt(cb.id.replace('q2a',''))));
+      if (JSON.stringify(selected.sort()) === JSON.stringify(correct2.sort())) {
+        document.getElementById('quiz-container').style.display = 'none';
+        document.getElementById('result-img').style.display = 'block';
+        document.getElementById('result-image').src = resultImageLink;
+      } else {
+        document.getElementById('popup').style.display = 'flex';
+      }
     }
 
-    // hiển thị popup gợi ý (thay HINT_IMAGE_URL bằng link ảnh của bạn)
-    function showHintPopup() {
-      const HINT_IMAGE_URL = "https://raw.githubusercontent.com/designdaovn/acgiaacbao-nhiemvu2/refs/heads/main/goi%20y%202.png";
-      // thay bằng URL ảnh bạn muốn hiển thị trong popup gợi ý
-      document.getElementById('hint-popup-img').src = HINT_IMAGE_URL;
+    function closePopup() {
+      document.getElementById('popup').style.display = 'none';
+    }
+
+    function openHint() {
       document.getElementById('hint-popup').style.display = 'flex';
     }
 
-    // đóng popup khi click ra ngoài nội dung popup
-    document.querySelectorAll('.popup').forEach(p => {
-      p.addEventListener('click', (e) => {
-        if (e.target === p) p.style.display = 'none';
-      });
-    });
+    function closeHint() {
+      document.getElementById('hint-popup').style.display = 'none';
+    }
 
-    // đóng popup bằng phím Esc
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') {
-        document.querySelectorAll('.popup').forEach(p => p.style.display = 'none');
-      }
-    });
+    window.onclick = function(e) {
+      const popup = document.getElementById('hint-popup');
+      if (e.target === popup) popup.style.display = 'none';
+    };
   </script>
 </body>
 </html>
