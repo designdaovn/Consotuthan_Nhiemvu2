@@ -31,12 +31,19 @@
       font-family: 'Lora', Georgia, serif;
       background: var(--dark3);
       min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
       padding: 30px 16px;
       position: relative;
       overflow-x: hidden;
+      /* Không dùng flex trên body để tránh lỗi position:fixed trên desktop */
+    }
+
+    /* Center wrapper thay thế cho body flex */
+    .page-center {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: calc(100vh - 60px);
     }
 
     body::before {
@@ -919,7 +926,6 @@
 </head>
 <body>
   <div class="scanlines"></div>
-
   <!-- ══════════════════════════════════════════════════
        TRÌNH PHÁT NHẠC — CỐ ĐỊNH GÓC TRÊN PHẢI
        Để thay nhạc: sửa src trong thẻ <audio> bên dưới
@@ -957,6 +963,7 @@
   </audio>
   <!-- ══════════════════════════════════════════════════ -->
 
+  <div class="page-center">
   <div class="case-file">
 
     <!-- ====== QUIZ ====== -->
@@ -1132,8 +1139,6 @@
         <span class="case-id">MÃ VỤ ÁN: #CST-002</span>
       </div>
       <div class="card result-card">
-        <img id="result-image" src="" alt="Kết quả">
-
         <!-- ══════════════════════════════════════════════════
              ẢNH GIẢI THÍCH — THAY LINK Ở ĐÂY
              Upload ảnh lên GitHub rồi dán link raw vào src bên dưới
@@ -1264,8 +1269,7 @@
         // ══════════════════════════════════════════════════
         // ẢNH KẾT QUẢ ĐÚNG — THAY LINK Ở ĐÂY
         // ══════════════════════════════════════════════════
-        document.getElementById('result-image').src =
-          "https://raw.githubusercontent.com/designdaovn/Consotuthan_Nhiemvu2/refs/heads/main/Giai%20thich%20NV2%20copy.jpg";
+        // ảnh kết quả đã bỏ — chỉ dùng ảnh giải thích
       } else {
         document.getElementById('popup-img').src =
           "https://raw.githubusercontent.com/designdaovn/Consotuthan_Nhiemvu2/refs/heads/main/khichondaansai.png";
@@ -1365,8 +1369,10 @@
       volSlider.style.setProperty('--vol', (val * 100) + '%');
     }
   </script>
+  </div><!-- /.page-center -->
+
   <!-- ══════════════════════════════════════════════════
-       FAB BUTTONS — GÓC DƯỚI PHẢI
+       FAB BUTTONS — GÓC DƯỚI PHẢI — NGOÀI PAGE-CENTER
        ══════════════════════════════════════════════════ -->
   <div class="fab-group">
 
