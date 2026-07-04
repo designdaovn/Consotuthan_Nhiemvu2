@@ -1258,12 +1258,15 @@
       const selected = [...document.querySelectorAll('#answers2 input:checked')]
         .map(cb => parseInt(cb.id.replace('q2a', '')));
 
-      if (selected.length !== 4) {
-        alert("⚠ Bạn phải chọn đúng 4 tài liệu!");
+      if (selected.length < 4) {
+        alert("⚠ Bạn phải chọn ít nhất 4 tài liệu!");
         return;
       }
 
-      if (JSON.stringify(selected.sort((a,b)=>a-b)) === JSON.stringify([...correct2].sort((a,b)=>a-b))) {
+      // Chỉ cần chọn đúng ít nhất 4 trong số 5 đáp án đúng của correct2 là được
+      const correctSelectedCount = selected.filter(v => correct2.includes(v)).length;
+
+      if (correctSelectedCount >= 4) {
         document.getElementById('quiz').style.display = 'none';
         document.getElementById('result-img').style.display = 'block';
         // ══════════════════════════════════════════════════
